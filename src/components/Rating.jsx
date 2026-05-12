@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom' // Add useParams
+import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { UserAuth } from '../context/AuthContext'
 import '../styles/Ratings.css'
 
 const Rating = () => {
     const [entities, setEntities] = useState([])
-    const [currentEntity, setCurrentEntity] = useState(null) // Add this for single entity
+    const [currentEntity, setCurrentEntity] = useState(null)
     const [loading, setLoading] = useState(true)
-    const { session, signOut } = UserAuth()
+    const [userVotes, setUserVotes] = useState({})
+    const { session } = UserAuth()
     const navigate = useNavigate()
-    const { entityId } = useParams() // Get entity ID from URL
+    const { entityId } = useParams()
 
     // Protect route - redirect if not logged in
     /*useEffect(() => {
@@ -24,32 +25,39 @@ const Rating = () => {
         if (session && entityId) {
             fetchSingleEntityWithRatings()
         } else if (session && !entityId) {
-            // Option A: If no entityId, fetch all entities (maybe for a list view)
             fetchEntitiesWithRatings()
         } else {
             setLoading(false)
         }
     }, [session, entityId])
 
-    // Fetch a single entity with its ratings
+    // Load user's votes when reviews load
+    useEffect(() => {
+        if (session && currentEntity?.reviews) {
+            loadUserVotes()
+        }
+    }, [currentEntity?.reviews, session])
+
+    // Fetch a single entity with its reviews
     const fetchSingleEntityWithRatings = async () => {
         try {
             setLoading(true)
             
             // Fetch the specific entity
             const { data: entity, error: entityError } = await supabase
-                .from('entities') // Your entities table name
+                .from('entities')
                 .select('*')
                 .eq('id', entityId)
                 .single()
             
             if (entityError) throw entityError
             
-            // Fetch reviews for this entity (using correct column names)
+            // Fetch reviews for this entity
             const { data: reviews, error: reviewsError } = await supabase
                 .from('reviews')
                 .select('*')
                 .eq('entity_id', entityId)
+                .order('created_at', { ascending: false }) // Show newest first
 
             if (reviewsError) throw reviewsError
 
@@ -64,38 +72,137 @@ const Rating = () => {
         }
     }
 
-    // Your existing fetchEntitiesWithRatings function (if needed)
+    // Fetch all entities (if needed)
     const fetchEntitiesWithRatings = async () => {
-        // Keep your existing implementation
+        try {
+            setLoading(true)
+            const { data: entities, error } = await supabase
+                .from('entities')
+                .select('*')
+            
+            if (error) throw error
+            setEntities(entities || [])
+        } catch (error) {
+            console.error('Error fetching entities:', error)
+        } finally {
+            setLoading(false)
+        }
     }
 
-    // Submit a new rating
-    const submitRating = async (ratingData) => {
-    try {
-        const { error } = await supabase
-            .from('reviews')
-            .insert([
-                {
-                    entity_id: entityId,
-                    user_id: session.user.id,
-                    rating: ratingData.rating,        // Changed from 'score' to 'rating'
-                    title: ratingData.title,          // Add this field
-                    review_text: ratingData.review,   // Changed from 'review' to 'review_text'
-                    upvote_count: 0,                  // Initialize
-                    downvote_count: 0,                // Initialize
-                    created_at: new Date(),
-                    updated_at: new Date()
-                }
-            ])
-        
-        if (error) throw error
-        
-        // Refresh the reviews after submission
-        await fetchSingleEntityWithRatings()
-    } catch (error) {
-        console.error('Error submitting review:', error)
+    // Check if user has already voted on a review
+    const checkUserVote = async (reviewId) => {
+        try {
+            const { data, error } = await supabase
+                .from('votes')
+                .select('vote_type')
+                .eq('target_id', reviewId)
+                .eq('user_id', session.user.id)
+                .eq('target_type', 'review')
+                .maybeSingle()
+            
+            if (error) throw error
+            return data?.vote_type || null
+        } catch (error) {
+            console.error('Error checking vote:', error)
+            return null
+        }
     }
-}
+
+    // Load all user votes for current reviews
+    const loadUserVotes = async () => {
+        try {
+            const votesMap = {}
+            for (const review of currentEntity.reviews) {
+                const vote = await checkUserVote(review.id)
+                if (vote) votesMap[review.id] = vote
+            }
+            setUserVotes(votesMap)
+        } catch (error) {
+            console.error('Error loading user votes:', error)
+        }
+    }
+
+    // Handle upvote/downvote
+    const handleVote = async (reviewId, voteType) => {
+        try {
+            const existingVote = userVotes[reviewId]
+            
+            // If clicking the same vote type -> remove vote
+            if (existingVote === voteType) {
+                // Delete from votes table
+                const { error: deleteError } = await supabase
+                    .from('votes')
+                    .delete()
+                    .eq('target_id', reviewId)
+                    .eq('user_id', session.user.id)
+                    .eq('target_type', 'review')
+                
+                if (deleteError) throw deleteError
+                
+                // Just refresh - don't manually update counts since they'll be fetched
+                await fetchSingleEntityWithRatings()
+                
+            } else {
+                // If changing vote type or new vote, handle accordingly
+                if (existingVote) {
+                    // Remove old vote first
+                    await supabase
+                        .from('votes')
+                        .delete()
+                        .eq('target_id', reviewId)
+                        .eq('user_id', session.user.id)
+                        .eq('target_type', 'review')
+                }
+                
+                // Add new vote
+                const { error: insertError } = await supabase
+                    .from('votes')
+                    .insert([{
+                        user_id: session.user.id,
+                        target_id: reviewId,
+                        target_type: 'review',
+                        vote_type: voteType,
+                        created_at: new Date()
+                    }])
+                
+                if (insertError) throw insertError
+                
+                // Just refresh - don't manually update counts
+                await fetchSingleEntityWithRatings()
+            }
+            
+        } catch (error) {
+            console.error('Error handling vote:', error)
+        }
+    }
+
+    // Submit a new review
+    const submitRating = async (ratingData) => {
+        try {
+            const { error } = await supabase
+                .from('reviews')
+                .insert([
+                    {
+                        entity_id: entityId,
+                        user_id: session.user.id,
+                        rating: ratingData.rating,
+                        title: ratingData.title,
+                        review_text: ratingData.review,
+                        upvote_count: 0,
+                        downvote_count: 0,
+                        created_at: new Date(),
+                        updated_at: new Date()
+                    }
+                ])
+            
+            if (error) throw error
+            
+            // Refresh the reviews after submission
+            await fetchSingleEntityWithRatings()
+        } catch (error) {
+            console.error('Error submitting review:', error)
+        }
+    }
 
     // Render single entity page
     if (loading) {
@@ -128,19 +235,34 @@ const Rating = () => {
                     currentEntity.reviews.map((review) => (
                         <div key={review.id} className="review-card">
                             <div className="review-rating">
-                                Rating: {review.rating}/5  {/* Changed from review.score */}
+                                Rating: {review.rating}/5
                             </div>
-                            <h3 className="review-title">{review.title}</h3>  {/* New field */}
-                            <p className="review-text">{review.review_text}</p>  {/* Changed from review.review */}
+                            <h3 className="review-title">{review.title}</h3>
+                            <p className="review-text">{review.review_text}</p>
+                            
+                            {/* Vote buttons */}
                             <div className="review-votes">
-                                👍 {review.upvote_count} | 👎 {review.downvote_count}
+                                <button 
+                                    onClick={() => handleVote(review.id, 'upvote')}
+                                    className={`vote-btn upvote ${userVotes[review.id] === 'upvote' ? 'active' : ''}`}
+                                >
+                                    👍 {review.upvote_count || 0}
+                                </button>
+                                <button 
+                                    onClick={() => handleVote(review.id, 'downvote')}
+                                    className={`vote-btn downvote ${userVotes[review.id] === 'downvote' ? 'active' : ''}`}
+                                >
+                                    👎 {review.downvote_count || 0}
+                                </button>
                             </div>
+                            
                             <small>Posted: {new Date(review.created_at).toLocaleDateString()}</small>
                         </div>
                     ))
                 )}
             </div>
             
+            {/* Review form */}
             <div className="rating-form">
                 <h2>Leave a Review</h2>
                 <form onSubmit={(e) => {
@@ -148,8 +270,8 @@ const Rating = () => {
                     const formData = new FormData(e.target);
                     submitRating({
                         rating: parseInt(formData.get('rating')),
-                        title: formData.get('title'),        // New field
-                        review: formData.get('review_text')  // Match schema name
+                        title: formData.get('title'),
+                        review: formData.get('review_text')
                     });
                     e.target.reset();
                 }}>
@@ -182,7 +304,7 @@ const Rating = () => {
                         Your Review:
                         <br />
                         <textarea 
-                            name="review_text"  // Changed from 'review'
+                            name="review_text"
                             rows="4" 
                             required
                             placeholder="Share your experience..."
