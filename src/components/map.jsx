@@ -4,7 +4,7 @@ import "@maptiler/sdk/dist/maptiler-sdk.css";
 import '../styles/map.css';
 import { supabase } from '../supabaseClient';
 
-const Map = () => {
+const Map = ({onEntitiesLoaded, mapRefExternal}) => {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const upv = { lng: 122.230924083072, lat: 10.6419865561452 };
@@ -22,15 +22,27 @@ const Map = () => {
       zoom: zoom,
     });
 
+    if (mapRefExternal) mapRefExternal.current = mapRef.current;
+
+    mapRef.current.on('mouseenter', 'Map marker', (e) => {
+        mapRef.current.getCanvas().style.cursor = 'pointer';
+      });
+
+    mapRef.current.on('mouseleave', 'Map marker', (e) => {
+        mapRef.current.getCanvas().style.cursor = '';
+      });
+
     const addMarkers = async () => {
       const { data: entities, error } = await supabase
         .from('entities')
-        .select('id, name, latitude, longitude, reviews(rating)');
+        .select('id, name, description, latitude, longitude, reviews(rating)');
 
       if (error) {
         console.error('Error fetching entities:', error.message);
         return;
       }
+
+      if (onEntitiesLoaded) onEntitiesLoaded(entities);
 
       entities.forEach((entity) => {
         const { id, name, latitude, longitude, reviews } = entity;
@@ -60,10 +72,12 @@ const Map = () => {
         const popup = new maptilersdk.Popup({ offset: 25 })
           .setHTML(popupHTML);
 
-        new maptilersdk.Marker({ color: '#FF0000' })
+        const marker = new maptilersdk.Marker({ color: '#FF0000' })
           .setLngLat([longitude, latitude])
           .setPopup(popup)
           .addTo(mapRef.current);
+          
+        marker.getElement().style.cursor = 'pointer';
       });
     };
 
