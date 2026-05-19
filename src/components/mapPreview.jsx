@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Map from './Map';
+import Map from './map.jsx';
 import '../styles/map.css';
 
 const MapPreview = () => {
