@@ -10,7 +10,7 @@ const Signin = () => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const { session, signInUser } = UserAuth()
+  const { signInUser } = UserAuth()
   const navigate = useNavigate()
 
   const handleSignIn = async (e) => {
@@ -22,17 +22,15 @@ const Signin = () => {
       if (result.success) {
         navigate('/dashboard')
       } else {
-        setError(result.error?.message || 'Unable to sign in')
+        setError(result.error?.message || result.error || 'Unable to sign in')
       }
     } catch (err) {
-      setError(err.message || 'an error occured during sign-in')
+      setError(err.message || 'An error occurred during sign-in')
     } finally {
       setLoading(false)
     }
   }
 
-  // Placeholder routes for buttons we haven't wired yet
-  const handleAdmin = () => navigate('/dashboard')
   const handleGuest = () => navigate('/dashboard')
   const handleResetPassword = () => navigate('/')
 
@@ -53,19 +51,14 @@ const Signin = () => {
             </h2>
 
             <div className="auth-options">
-              <button
-                type="button"
-                className="auth-btn auth-btn-outline"
-                onClick={handleAdmin}
-              >
-                Login as Admin
-              </button>
+              {/* Admin and User both use the same email/password form.
+                  The role assigned in user_profiles determines what they see. */}
               <button
                 type="button"
                 className="auth-btn auth-btn-primary"
                 onClick={() => setView('user')}
               >
-                Login as User
+                Login
               </button>
               <button
                 type="button"
