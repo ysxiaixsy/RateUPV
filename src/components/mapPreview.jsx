@@ -43,26 +43,23 @@ const MapPreview = () => {
               ? entity.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
               : 0;
             const stars = '★'.repeat(Math.floor(avgRating)) + '☆'.repeat(5 - Math.floor(avgRating));
-
             return (
-              <div
-                key={entity.id}
-                className="sidebar-entity-card"
-                onClick={() => flyToMarker(entity)}
-              >
-                <strong>{entity.name}</strong>
-                <div className="sidebar-stars">{stars}</div>
-                <div className="sidebar-rating-text">
-                  {avgRating.toFixed(1)} / 5 ({reviewCount} review{reviewCount !== 1 ? 's' : ''})
+                <div key={entity.id} className="sidebar-entity-card" onClick={() => flyToMarker(entity)}>
+                  <strong>{entity.name}</strong>
+                  <div className="sidebar-entity-image">
+                    {entity.image_link ? (
+                      <img src={entity.image_link} alt={entity.name} />
+                    ) : (
+                      <div className="sidebar-image-placeholder" />
+                    )}
+                  </div>
+                  <div className="sidebar-stars">{stars}</div>
+                  <div className="sidebar-rating-text">
+                    {avgRating.toFixed(1)} / 5 ({reviewCount} review{reviewCount !== 1 ? 's' : ''})
+                  </div>
+                  <p>{entity.description || 'No description available'}</p>
+                  <a href={`/rating/${entity.id}`} onClick={(e) => e.stopPropagation()} >View Reviews</a>
                 </div>
-                <p>{entity.description || 'No description available'}</p>
-                <a
-                  href={`/rating/${entity.id}`}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  View Reviews
-                </a>
-              </div>
             );
           })}
         </div>
@@ -75,11 +72,7 @@ const MapPreview = () => {
         >
           Back
         </button>
-        <Map
-          onEntitiesLoaded={setEntities}
-          mapRefExternal={mapRefExternal}
-          markersRef={markersRef}
-        />
+        <Map onEntitiesLoaded={setEntities} mapRefExternal={mapRefExternal} markersRef={markersRef} />
       </div>
     </div>
   );
