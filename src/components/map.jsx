@@ -4,7 +4,7 @@ import "@maptiler/sdk/dist/maptiler-sdk.css";
 import '../styles/map.css';
 import { supabase } from '../supabaseClient';
 
-const Map = ({ onEntitiesLoaded }) => {
+const Map = ({ onEntitiesLoaded, mapRefExternal, markersRef }) => {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const upv = { lng: 122.230924083072, lat: 10.6419865561452 };
@@ -22,10 +22,13 @@ const Map = ({ onEntitiesLoaded }) => {
       zoom: zoom,
     });
 
+    // Share map instance with parent
+    if (mapRefExternal) mapRefExternal.current = mapRef.current;
+
     const addMarkers = async () => {
       const { data: entities, error } = await supabase
         .from('entities')
-        .select('id, name, description, latitude, longitude, reviews(rating)');
+        .select('id, name, description, image_link, latitude, longitude, reviews(rating)');
 
       if (error) {
         console.error('Error fetching entities:', error.message);
@@ -63,6 +66,9 @@ const Map = ({ onEntitiesLoaded }) => {
           .addTo(mapRef.current);
 
         marker.getElement().style.cursor = 'pointer';
+
+        // Store marker by entity id so parent can access it
+        if (markersRef) markersRef.current[id] = marker;
       });
     };
 
