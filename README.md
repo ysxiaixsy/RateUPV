@@ -1,3 +1,20 @@
+# Rate UPV
+
+Student-driven reviews of University of the Philippines Visayas (UPV) campus facilities and services — think "Rate My Professors," but for the places and services around campus. Browse entities, read and write reviews, reply to discussions, and vote on what's helpful.
+
+> CMSC 126 final project — Team JJEM Alert
+
+## About
+
+- **Browse & search** campus facilities and services, each with an aggregate rating shown as a decimal score.
+- **Reviews, replies & votes** — signed-in students can post reviews, reply, and upvote/downvote.
+- **Campus map** — view every entity on an interactive map and jump straight to its reviews.
+- **Guest mode** — browse everything read-only, no account needed.
+- **UP-only accounts** — only `@up.edu.ph` emails can register, with email confirmation.
+- **Roles** — guests (read-only), students (review/reply/vote), and admins (manage entities).
+
+**Built with:** React 19, Vite 8, React Router 7, Supabase (Postgres, Auth, RLS), and MapTiler. Deployed on Vercel.
+
 # Access our website
 The website is deployed using vercel [here](https://126-final-project-orpin.vercel.app/)
 
