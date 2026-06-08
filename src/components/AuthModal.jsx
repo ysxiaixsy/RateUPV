@@ -11,7 +11,7 @@ const UP_EMAIL_PATTERN = /@up\.edu\.ph$/i
 // same flows the old full-page routes did (login, signup, guest, email
 // confirmation) and closes on success instead of navigating.
 export default function AuthModal() {
-  const { authModal, closeAuth, signInUser, signUpNewUser, signInAsGuest } = UserAuth()
+  const { authModal, closeAuth, signInUser, signUpNewUser } = UserAuth()
   const open = authModal?.open
 
   const [mode, setMode] = useState('signin')
@@ -69,11 +69,6 @@ export default function AuthModal() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleGuest = async () => {
-    await signInAsGuest()
-    closeAuth()
   }
 
   const handleSignUp = async (e) => {
@@ -161,10 +156,6 @@ export default function AuthModal() {
                 {loading ? 'Signing in…' : 'Log in'}
               </button>
             </form>
-            <button type="button" className="auth-btn auth-btn-ghost" onClick={handleGuest}>
-              Continue as guest
-            </button>
-            <div className="auth-divider" />
             <p className="auth-helper">
               Don't have an account yet?{' '}
               <button type="button" className="auth-link" onClick={() => switchMode('signup')}>
