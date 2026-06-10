@@ -22,10 +22,12 @@ const Map = ({ onEntitiesLoaded, onError, externalMapRef, markersRef }) => {
   useEffect(() => {
     if (mapRef.current) return;
 
-    // No explicit style: the SDK default (Streets) applies — the old
-    // MapStyle.STREETS reference is deprecated/invalid in this SDK version.
-    // The explicit projection skips the SDK's projection-migration step,
-    // which throws an internal TypeError when left to auto-migrate.
+    // No explicit style (the SDK default Streets applies — MapStyle.STREETS
+    // is a deprecated reference in SDK 4.0.x) and an explicit projection for
+    // determinism. Known SDK 4.0.2 bug: its internal load sequence still logs
+    // a non-fatal projection-migration TypeError and style deprecation
+    // warnings regardless of these options; the map renders fine. Revisit
+    // when @maptiler/sdk 4.0.3+ is stable.
     const map = new maptilersdk.Map({
       container: mapContainer.current,
       center: [UPV_CENTER.lng, UPV_CENTER.lat],

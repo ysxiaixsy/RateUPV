@@ -13,8 +13,8 @@ export default function EntityMiniMap({ lat, lng, zoom = 16 }) {
   useEffect(() => {
     if (mapRef.current || lat == null || lng == null) return
 
-    // No explicit style (SDK default Streets) + explicit projection to skip
-    // the SDK's crashing projection-migration step — see map.jsx.
+    // No explicit style (SDK default Streets) + explicit projection — see the
+    // known-SDK-bug note in map.jsx.
     mapRef.current = new maptilersdk.Map({
       container: containerRef.current,
       center: [lng, lat],

@@ -42,6 +42,12 @@ reference `user_profiles` with no cascade, so Postgres blocks the delete. There
 is no account-deletion feature in the app; if one is added, decide between
 cascading deletes or content anonymization first.
 
+**Known limitation (vendor):** `@maptiler/sdk` 4.0.2 (latest stable) logs a
+non-fatal internal TypeError (`migrateProjection`) and style deprecation
+warnings during every map load, regardless of constructor options. The map
+renders and behaves correctly. Re-test and remove this note when upgrading to
+SDK 4.0.3+.
+
 **Race conditions reviewed:** the vote flow is delete-then-insert; the worst
 interleaving (two tabs) hits the UNIQUE constraint, the write fails, and the
 optimistic UI rolls back. Review submission races resolve to 23505 → friendly
