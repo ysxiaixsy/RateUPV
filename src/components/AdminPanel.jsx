@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
 import { UserAuth } from '../context/AuthContext'
+import Button from './ui/Button'
 import Icon from './ui/Icon'
 import '../styles/AdminPanel.css'
 
@@ -81,11 +82,11 @@ const EntityForm = ({ form, setForm, onSubmit, submitLabel, status, loading }) =
       />
     </div>
     {status && (
-      <div className={`ap-status ap-status--${status.type}`}>{status.msg}</div>
+      <div className={`rupv-alert rupv-alert--${status.type}`} role="alert">{status.msg}</div>
     )}
-    <button className="ap-submit" type="submit" disabled={loading}>
+    <Button type="submit" variant="primary" size="md" block loading={loading}>
       {loading ? 'Saving…' : submitLabel}
-    </button>
+    </Button>
   </form>
 )
 
@@ -355,15 +356,15 @@ const AdminPanel = ({ onEntityChange, pendingEdit, pendingDelete, onConsumed }) 
                 <span className="ap-delete-sub">This will also remove all associated reviews.</span>
               </p>
               {status && (
-                <div className={`ap-status ap-status--${status.type}`}>{status.msg}</div>
+                <div className={`rupv-alert rupv-alert--${status.type}`} role="alert">{status.msg}</div>
               )}
               <div className="ap-delete-actions">
-                <button className="ap-btn-ghost" onClick={() => { reset(); setMode('add') }}>
+                <Button variant="ghost" size="md" onClick={() => { reset(); setMode('add') }}>
                   Cancel
-                </button>
-                <button className="ap-btn-danger" onClick={handleDelete} disabled={loading}>
+                </Button>
+                <Button variant="danger" size="md" onClick={handleDelete} loading={loading}>
                   {loading ? 'Deleting…' : 'Yes, delete'}
-                </button>
+                </Button>
               </div>
             </div>
           ) : (

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { UserAuth } from '../context/AuthContext'
+import Button from './ui/Button'
 import Icon from './ui/Icon'
 import '../styles/Auth.css'
 
@@ -166,10 +167,10 @@ export default function AuthModal() {
                   autoComplete="current-password"
                 />
               </div>
-              {error && <div className="auth-error">{error}</div>}
-              <button type="submit" className="auth-btn auth-btn-primary" disabled={loading}>
+              {error && <div className="rupv-alert rupv-alert--error" role="alert">{error}</div>}
+              <Button type="submit" variant="primary" size="md" block loading={loading}>
                 {loading ? 'Signing in…' : 'Log in'}
-              </button>
+              </Button>
             </form>
             <p className="auth-helper">
               Don't have an account yet?{' '}
@@ -216,10 +217,10 @@ export default function AuthModal() {
                   autoComplete="new-password"
                 />
               </div>
-              {error && <div className="auth-error">{error}</div>}
-              <button type="submit" className="auth-btn auth-btn-primary" disabled={loading}>
+              {error && <div className="rupv-alert rupv-alert--error" role="alert">{error}</div>}
+              <Button type="submit" variant="primary" size="md" block loading={loading}>
                 {loading ? 'Signing up…' : 'Sign up'}
-              </button>
+              </Button>
             </form>
             <p className="auth-helper">
               Already have an account?{' '}

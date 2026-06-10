@@ -75,7 +75,7 @@ function ReviewForm({ initial, onSubmit, onCancel, error, busy }) {
         />
       </label>
 
-      {error && <p className="rupv-rform-error">{error}</p>}
+      {error && <p className="rupv-alert rupv-alert--error" role="alert">{error}</p>}
 
       <div className="rupv-rform-actions">
         <Button type="submit" variant="primary" size="md" loading={busy} disabled={!rating}>

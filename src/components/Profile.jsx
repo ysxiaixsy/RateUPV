@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { UserAuth } from '../context/AuthContext'
 import Avatar from './ui/Avatar'
+import Button from './ui/Button'
 import Icon from './ui/Icon'
 import '../styles/Profile.css'
 
@@ -154,7 +155,7 @@ const Profile = () => {
                 <div className="profile-header">
                     <button
                         type="button"
-                        className="back-btn"
+                        className="rupv-backbtn"
                         onClick={() => navigate(-1)}
                         aria-label="Go back"
                     >
@@ -214,37 +215,39 @@ const Profile = () => {
 
                     </div>
 
-                    {saveError && <div className="profile-error">{saveError}</div>}
+                    {saveError && (
+                        <div className="rupv-alert rupv-alert--error" role="alert">{saveError}</div>
+                    )}
 
                     {!isGuest && (
                     <div className="profile-actions">
                         {isEditing ? (
                             <>
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
+                                <Button
+                                    variant="primary"
+                                    size="md"
                                     onClick={handleSave}
-                                    disabled={saving}
+                                    loading={saving}
                                 >
                                     {saving ? 'Saving…' : 'Save changes'}
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-ghost"
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="md"
                                     onClick={handleCancel}
                                     disabled={saving}
                                 >
                                     Cancel
-                                </button>
+                                </Button>
                             </>
                         ) : (
-                            <button
-                                type="button"
-                                className="btn btn-outline"
+                            <Button
+                                variant="ghost"
+                                size="md"
                                 onClick={() => setIsEditing(true)}
                             >
-                                Edit profile
-                            </button>
+                                <Icon name="edit" size={16} /> Edit profile
+                            </Button>
                         )}
                     </div>
                     )}

@@ -64,12 +64,12 @@ const MapPreview = () => {
 
       {/* Floating top-left controls */}
       <div className="map-controls">
-        <button type="button" className="map-back-btn" onClick={() => navigate(-1)}>
+        <button type="button" className="rupv-backbtn" onClick={() => navigate(-1)}>
           <Icon name="arrowLeft" size={16} /> Back
         </button>
         <button
           type="button"
-          className="map-toggle-btn"
+          className="rupv-backbtn"
           onClick={() => setListOpen((o) => !o)}
           aria-pressed={listOpen}
         >

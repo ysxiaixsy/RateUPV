@@ -286,7 +286,7 @@ const Replies = () => {
                   onChange={(e) => setReplyText(e.target.value)}
                 />
               </label>
-              {replyError && <p className="rupv-rform-error">{replyError}</p>}
+              {replyError && <p className="rupv-alert rupv-alert--error" role="alert">{replyError}</p>}
               <div className="rupv-rform-actions">
                 <Button type="submit" variant="primary" size="md" loading={busy}>
                   Submit reply
