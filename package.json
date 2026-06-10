@@ -1,7 +1,7 @@
 {
-  "name": "cmsc126-jjemalert-finalproj",
+  "name": "rate-upv",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
