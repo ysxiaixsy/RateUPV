@@ -9,6 +9,7 @@ import Icon from './ui/Icon'
 import RatingBadge from './ui/RatingBadge'
 import VoteStack from './ui/VoteStack'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { computeVoteTransition } from '../utils/votes'
 import '../styles/Ratings.css'
 
 const REPLY_MAX = 2000
@@ -125,20 +126,7 @@ const Replies = () => {
   async function handleVote(voteType) {
     if (!canWrite || !review) return
 
-    let newVote
-    let upDelta = 0
-    let downDelta = 0
-    if (userVote === voteType) {
-      newVote = null
-      if (voteType === 'upvote') upDelta = -1
-      else downDelta = -1
-    } else {
-      newVote = voteType
-      if (userVote === 'upvote') upDelta -= 1
-      else if (userVote === 'downvote') downDelta -= 1
-      if (voteType === 'upvote') upDelta += 1
-      else downDelta += 1
-    }
+    const { newVote, upDelta, downDelta } = computeVoteTransition(userVote, voteType)
 
     const prevVote = userVote
     const prevPage = page

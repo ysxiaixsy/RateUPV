@@ -10,6 +10,7 @@ import Pill from './ui/Pill'
 import RatingBadge from './ui/RatingBadge'
 import VoteStack from './ui/VoteStack'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { computeVoteTransition } from '../utils/votes'
 import '../styles/Ratings.css'
 
 // MapTiler SDK is heavy — only load it when an entity actually has coordinates.
@@ -237,20 +238,7 @@ const Rating = () => {
     // Figure out the new vote and how the counts shift, then apply it to the UI
     // immediately so it feels instant. The DB write runs in the background; the
     // count columns are kept correct server-side by a trigger, so no refetch.
-    let newVote
-    let upDelta = 0
-    let downDelta = 0
-    if (existingVote === voteType) {
-      newVote = undefined // toggling the same vote off
-      if (voteType === 'upvote') upDelta = -1
-      else downDelta = -1
-    } else {
-      newVote = voteType
-      if (existingVote === 'upvote') upDelta -= 1
-      else if (existingVote === 'downvote') downDelta -= 1
-      if (voteType === 'upvote') upDelta += 1
-      else downDelta += 1
-    }
+    const { newVote, upDelta, downDelta } = computeVoteTransition(existingVote, voteType)
 
     // Snapshots for rollback if the write fails.
     const prevVotes = userVotes

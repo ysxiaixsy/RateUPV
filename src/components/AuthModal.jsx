@@ -3,11 +3,9 @@ import { UserAuth } from '../context/AuthContext'
 import Button from './ui/Button'
 import Icon from './ui/Icon'
 import { useModalA11y } from '../hooks/useModalA11y'
+import { isUpEmail } from '../utils/validation'
 import '../styles/Auth.css'
 
-// Mirror of the DB trigger (restrict_up_email_signups) for a clean client-side
-// message before the request is sent.
-const UP_EMAIL_PATTERN = /@up\.edu\.ph$/i
 const PASSWORD_MIN = 6
 
 // ── Inner card — mounted only while the modal is open, so all form state
@@ -52,7 +50,7 @@ function AuthCard({ initialMode, onRequestClose, closing }) {
     e.preventDefault()
     setError('')
     const cleanEmail = email.trim()
-    if (!UP_EMAIL_PATTERN.test(cleanEmail)) {
+    if (!isUpEmail(cleanEmail)) {
       setError('Please use your UP email address (must end in @up.edu.ph).')
       return
     }

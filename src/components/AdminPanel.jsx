@@ -4,6 +4,7 @@ import { UserAuth } from '../context/AuthContext'
 import Button from './ui/Button'
 import Icon from './ui/Icon'
 import { useModalA11y } from '../hooks/useModalA11y'
+import { validateCoordinates } from '../utils/validation'
 import '../styles/AdminPanel.css'
 
 const ENTITY_TYPES = ['facility', 'service']
@@ -67,12 +68,9 @@ const EntityForm = ({ initial, onSubmit, submitLabel, status, loading }) => {
       setLocalError("The name can't be just spaces.")
       return
     }
-    if (Number.isNaN(latitude) || latitude < -90 || latitude > 90) {
-      setLocalError('Latitude must be a number between -90 and 90.')
-      return
-    }
-    if (Number.isNaN(longitude) || longitude < -180 || longitude > 180) {
-      setLocalError('Longitude must be a number between -180 and 180.')
+    const coordError = validateCoordinates(latitude, longitude)
+    if (coordError) {
+      setLocalError(coordError)
       return
     }
     setLocalError(null)
